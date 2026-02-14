@@ -49,7 +49,7 @@ export const PROVIDERS = {
         id: 'openrouter',
         name: 'OpenRouter',
         url: 'https://openrouter.ai/api/v1/chat/completions',
-        defaultModel: 'google/gemini-2.5-flash',
+        defaultModel: 'minimax/minimax-m2.5',
     },
 };
 

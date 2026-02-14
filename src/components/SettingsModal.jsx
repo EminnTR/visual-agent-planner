@@ -64,7 +64,7 @@ const SettingsModal = () => {
                                     onClick={() => setApiMode('backend')}
                                     title="Use our secure proxy with daily limits"
                                 >
-                                    🌍 Demo Proxy
+                                    🌍 Demo
                                 </button>
                                 <button
                                     className={`settings-provider-btn ${apiMode === 'local' ? 'active' : ''}`}
@@ -104,24 +104,23 @@ const SettingsModal = () => {
                             </div>
                         )}
 
-                        {/* Model Override (Only in Local Mode) */}
-                        {apiMode === 'local' && (
-                            <div className="settings-section">
-                                <label className="settings-label">
-                                    Model
-                                    <span className="settings-label-hint">
-                                        (defaults to {PROVIDERS.openrouter.defaultModel})
-                                    </span>
-                                </label>
-                                <input
-                                    type="text"
-                                    className="settings-model-input"
-                                    placeholder={PROVIDERS.openrouter.defaultModel}
-                                    value={modelOverride}
-                                    onChange={(e) => setModelOverride(e.target.value)}
-                                />
-                            </div>
-                        )}
+                        {/* Model Override */}
+                        <div className="settings-section">
+                            <label className="settings-label">
+                                Model
+                                <span className="settings-label-hint">
+                                    (defaults to {apiMode === 'backend' ? 'minimax/minimax-m2.5' : PROVIDERS.openrouter.defaultModel})
+                                </span>
+                            </label>
+                            <input
+                                type="text"
+                                className={`settings-model-input ${apiMode === 'backend' ? 'disabled' : ''}`}
+                                placeholder={apiMode === 'backend' ? 'minimax/minimax-m2.5' : PROVIDERS.openrouter.defaultModel}
+                                value={apiMode === 'backend' ? 'minimax/minimax-m2.5' : modelOverride}
+                                onChange={(e) => apiMode !== 'backend' && setModelOverride(e.target.value)}
+                                disabled={apiMode === 'backend'}
+                            />
+                        </div>
 
                         {/* Status + Save */}
                         <div className="settings-footer">
