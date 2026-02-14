@@ -169,13 +169,32 @@ async function callProviderAPI(description, { url, apiKey, model, name, useProxy
     }
 
     if (!response.ok) {
+        let errMsg = `${name} API error: ${response.status}`;
         try {
-            const errData = await response.json();
-            throw new Error(errData.error || `${name} API error: ${response.status}`);
-        } catch (e) {
-            if (e.message.includes('Demo limit') || e.message.includes('API error')) throw e;
-            throw new Error(`${name} API error: ${response.status}`);
+            const text = await response.text();
+            try {
+                // Try parsing JSON
+                const errData = JSON.parse(text);
+                // Handle { error: "message" } and { error: { message: "..." } } keys
+                const rawError = errData.error || errData.message;
+                if (typeof rawError === 'string') {
+                    errMsg = rawError;
+                } else if (rawError && typeof rawError === 'object' && rawError.message) {
+                    errMsg = rawError.message; // OpenRouter/OpenAI nested format
+                } else if (text.length < 200) {
+                    errMsg = text; // Fallback to raw text if short
+                }
+            } catch (jsonErr) {
+                // Not JSON, use raw text if it's short/readable
+                if (text && text.length < 300) {
+                    errMsg = text;
+                }
+            }
+        } catch (readErr) {
+            // Cannot read body
         }
+
+        throw new Error(errMsg);
     }
 
     const data = await response.json();
