@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Settings, X, Eye, EyeOff, Check } from 'lucide-react';
 import useSettingsStore from '../settingsStore';
 import { PROVIDERS } from '../engine/suggestionEngine';
@@ -14,6 +14,22 @@ const SettingsModal = () => {
 
     const [showKey, setShowKey] = useState(false);
     const [saved, setSaved] = useState(false);
+    const [usage, setUsage] = useState(null);
+    const [loadingUsage, setLoadingUsage] = useState(false);
+
+    // Fetch usage when modal opens and mode is backend
+    useEffect(() => {
+        if (isOpen && apiMode === 'backend') {
+            setLoadingUsage(true);
+            fetch('/api/suggest')
+                .then(res => res.json())
+                .then(data => {
+                    setUsage(data);
+                    setLoadingUsage(false);
+                })
+                .catch(() => setLoadingUsage(false));
+        }
+    }, [isOpen, apiMode]);
 
     const handleSave = () => {
         setSaved(true);
@@ -24,7 +40,7 @@ const SettingsModal = () => {
     };
 
     const hasKey = !!getEffectiveKey();
-    const isDemo = apiMode === 'backend' || !hasKey;
+    const isDemo = apiMode === 'backend';
 
     return (
         <>
@@ -51,7 +67,6 @@ const SettingsModal = () => {
                                 <X size={18} />
                             </button>
                         </div>
-
 
 
 
@@ -125,9 +140,17 @@ const SettingsModal = () => {
                         {/* Status + Save */}
                         <div className="settings-footer">
                             <div className={`settings-status ${isDemo ? 'warn' : 'ok'}`}>
-                                {apiMode === 'backend'
-                                    ? `⚠️ Using Free Demo (${import.meta.env.VITE_DEMO_LIMIT || 5}/day)`
-                                    : (hasKey ? '✓ Key Configured' : '❌ Key Missing')}
+                                {apiMode === 'backend' ? (
+                                    loadingUsage ? (
+                                        '⏳ Checking limit...'
+                                    ) : (
+                                        usage && usage.limit
+                                            ? `⚠️ Demo Limit: ${usage.used}/${usage.limit} used`
+                                            : '⚠️ Demo Mode (Unlimited)'
+                                    )
+                                ) : (
+                                    hasKey ? '✓ Key Configured' : '❌ Key Missing'
+                                )}
                             </div>
                             <button className={`settings-save ${saved ? 'saved' : ''}`} onClick={handleSave}>
                                 {saved ? <><Check size={16} /> Saved</> : 'Done'}

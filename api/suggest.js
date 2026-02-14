@@ -2,7 +2,41 @@
 import { kv } from '@vercel/kv';
 
 export default async function handler(req, res) {
-    // Only allow POST
+    // 1. GET Request: Check Global Limit Status
+    if (req.method === 'GET') {
+        const limit = parseInt(process.env.VITE_DEMO_LIMIT || '5', 10);
+
+        if (!process.env.KV_REST_API_URL || !process.env.KV_REST_API_TOKEN) {
+            return res.status(200).json({
+                limit: null,
+                used: 0,
+                remaining: null,
+                status: 'unlimited'
+            });
+        }
+
+        try {
+            const { kv } = require('@vercel/kv');
+            const today = new Date().toISOString().split('T')[0];
+            const counterKey = `vap_global_limit:${today}`;
+
+            const currentCount = await kv.get(counterKey) || 0;
+            const used = parseInt(currentCount, 10);
+
+            return res.status(200).json({
+                limit,
+                used,
+                remaining: Math.max(0, limit - used),
+                status: used >= limit ? 'exhausted' : 'active'
+            });
+        } catch (error) {
+            console.error('KV Status Check Error:', error);
+            // Fail open/gracefully for status check
+            return res.status(200).json({ status: 'error', error: 'Could not fetch status' });
+        }
+    }
+
+    // Only allow POST for suggestions
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
