@@ -61,12 +61,13 @@ const Canvas = () => {
     if (!hasGenerated && totalCount === 0) {
         return (
             <div className="canvas-hero">
-                <PromptBar onSuggest={handleSuggest} onPreset={handlePreset} isLoading={isLoading} />
-                {error && (
-                    <div className="error-banner" onClick={() => setError(null)}>
-                        ⚠️ {error}
-                    </div>
-                )}
+                <PromptBar
+                    onSuggest={handleSuggest}
+                    onPreset={handlePreset}
+                    isLoading={isLoading}
+                    error={error}
+                    onClearError={() => setError(null)}
+                />
                 <SettingsModal />
             </div>
         );
@@ -98,6 +99,8 @@ const Canvas = () => {
                 <PromptBar
                     onSuggest={handleSuggest}
                     isLoading={isLoading}
+                    error={error}
+                    onClearError={() => setError(null)}
                     compact
                 />
             </header>

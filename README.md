@@ -1,8 +1,9 @@
 # Visual Agent Planner (VAP)
 
-**Build your Claude Code team in seconds.**
+**A visual configuration builder for [Claude Code](https://github.com/anthropics/claude-code).**
 
-VAP brings the powerful `aitmpl.com` template catalog (1477+ components) to a visual interface. Describe your project, and AI selects the best Agents, Commands, and MCPs for you.
+
+VAP brings the powerful `aitmpl.com` template catalog (1477+ components) to a visual interface. Describe your project, and AI selects the best Agents, Commands, and MCPs to supercharge your Claude Code CLI.
 
 ## Features
 
@@ -28,17 +29,14 @@ vercel dev
 
 ## Deployment (Vercel)
 
-To enable the secure backend proxy and rate limiting for demos:
-
 1.  Deploy to **Vercel**.
 2.  Add the following **Environment Variables** in Vercel Settings:
 
 | Variable | Description |
 | :--- | :--- |
 | `SERVER_OPENROUTER_API_KEY` | API Key for OpenRouter (Backend Proxy) |
-| `SESSION_SECRET` | Random string for signing cookies |
+| `VITE_DEMO_LIMIT` | Global Daily Limit (Optional, default: 5). Requires Vercel KV. |
 
-*Note: Frontend-only mode works if users enter their own keys in the Settings panel.*
 
 ## Tech Stack
 

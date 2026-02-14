@@ -1,5 +1,5 @@
 
-import crypto from 'crypto';
+import { kv } from '@vercel/kv';
 
 export default async function handler(req, res) {
     // Only allow POST
@@ -10,80 +10,35 @@ export default async function handler(req, res) {
     try {
         const { model, messages, providerId } = req.body;
 
-        // 1. Rate Limiting Strategy
+        // 1. Rate Limiting (Global Only - Vercel KV)
         // ---------------------------------------------------------
-        // Strategy A: Global Limit (Requires Vercel KV)
-        // Strategy B: Per-User Limit (Cookie-based Fallback)
-
         const limit = parseInt(process.env.VITE_DEMO_LIMIT || '5', 10);
-        let limitReached = false;
-        let limitMsg = '';
-        let kvFailed = false;
 
+        // Only run rate limiting if KV is configured
         if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
-            // --- STRATEGY A: GLOBAL LIMIT (KV) ---
             try {
-                const { kv } = require('@vercel/kv');
                 const today = new Date().toISOString().split('T')[0];
                 const counterKey = `vap_global_limit:${today}`;
 
                 let currentCount = await kv.incr(counterKey);
-                if (currentCount === 1) await kv.expire(counterKey, 86400);
+
+                // Set expiry for 24 hours (86400 seconds) only on first create
+                if (currentCount === 1) {
+                    await kv.expire(counterKey, 86400);
+                }
 
                 if (currentCount > limit) {
-                    limitReached = true;
-                    limitMsg = `Global Demo Limit Reached (${limit}/${limit}). The demo is paused for today.`;
+                    return res.status(429).json({
+                        error: `Global Demo Limit Reached (${limit}/${limit}). The demo is paused for today.`
+                    });
                 }
             } catch (error) {
-                console.error('KV Error (Falling back to cookies):', error);
-                limitReached = false; // Reset just in case
-                // Force fallback by modifying a flag or ensuring the next block runs
-                kvFailed = true;
+                // If KV fails (e.g. connection error), log it but allow request
+                console.error('KV Rate Limit Error:', error);
             }
         }
 
-        // Check KV vars again OR if manual fallback triggered
-        if (!process.env.KV_REST_API_URL || !process.env.KV_REST_API_TOKEN || kvFailed || limitReached) {
-            // --- STRATEGY B: PER-USER LIMIT (COOKIE) ---
-            // Only runs if KV is missing or failed, or if KV limit was already reached
-            // If KV limit was reached, we still want to set the cookie for the user
-            const secret = process.env.SESSION_SECRET || 'dev-secret';
-            const today = new Date().toISOString().split('T')[0];
-
-            const cookieHeader = req.headers.cookie || '';
-            const cookies = Object.fromEntries(cookieHeader.split('; ').map(c => c.split('=')));
-            const cookie = cookies['vap_usage'];
-            let count = 0;
-
-            if (cookie) {
-                const val = decodeURIComponent(cookie);
-                const [date, countStr, sig] = val.split('|');
-                const expectedSig = crypto.createHmac('sha256', secret).update(`${date}|${countStr}`).digest('hex');
-
-                if (sig === expectedSig && date === today) {
-                    count = parseInt(countStr, 10);
-                }
-            }
-
-            if (count >= limit) {
-                // If KV limit already reached, we prefer that message unless user limit also reached
-                // Actually if user limit reached, show that.
-                if (!limitReached) {
-                    limitReached = true;
-                    limitMsg = `Your Daily Demo Limit Reached (${limit}/${limit}). Please add your own API key.`;
-                }
-            } else if (!limitReached) {
-                // Only increment if NO limit is reached (Global or Personal)
-                count++;
-                const newSig = crypto.createHmac('sha256', secret).update(`${today}|${count}`).digest('hex');
-                const newCookieVal = `${today}|${count}|${newSig}`;
-                res.setHeader('Set-Cookie', `vap_usage=${newCookieVal}; Path=/; HttpOnly; SameSite=Strict; Max-Age=86400`);
-            }
-        }
-
-        if (limitReached) {
-            return res.status(429).json({ error: limitMsg });
-        }
+        // If KV is not configured, we proceed WITHOUT limits (Fail Open).
 
 
         // 2. Proxy Logic

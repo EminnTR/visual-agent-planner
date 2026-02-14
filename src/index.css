@@ -255,6 +255,66 @@ body {
   box-shadow: none;
 }
 
+/* Error State */
+.prompt-hero-input-wrapper.has-error {
+  border-color: var(--error);
+  background: rgba(239, 68, 68, 0.05);
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.15);
+  animation: shake 0.4s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+.prompt-error-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fca5a5;
+  font-size: 0.85rem;
+  margin-top: 12px;
+  animation: fadeInUp 0.3s ease;
+}
+
+.prompt-error-inline button {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.6;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  margin-left: auto;
+}
+
+.prompt-error-inline button:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+@keyframes shake {
+
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+
 /* Examples */
 .prompt-examples {
   width: 100%;
@@ -605,6 +665,18 @@ body {
 .prompt-compact-inner:focus-within {
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.1);
+}
+
+.prompt-compact-inner.has-error {
+  border-color: var(--error);
+  background: rgba(239, 68, 68, 0.05);
+  animation: shake 0.4s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+.prompt-error-inline.compact {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  padding-left: 8px;
 }
 
 .prompt-compact .prompt-sparkle {

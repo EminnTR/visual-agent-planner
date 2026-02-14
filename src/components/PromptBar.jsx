@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Sparkles, ArrowRight, Loader2, PenLine, Cpu, Package } from 'lucide-react';
+import { Sparkles, ArrowRight, Loader2, PenLine, Cpu, Package, AlertCircle, X } from 'lucide-react';
 import PRESETS from '../data/presets';
 
 const CATEGORIES = [
@@ -32,7 +32,7 @@ const HOW_IT_WORKS = [
     },
 ];
 
-const PromptBar = ({ onSuggest, onPreset, isLoading, compact = false }) => {
+const PromptBar = ({ onSuggest, onPreset, isLoading, compact = false, error, onClearError }) => {
     const [prompt, setPrompt] = useState('');
     const inputRef = useRef(null);
 
@@ -45,6 +45,7 @@ const PromptBar = ({ onSuggest, onPreset, isLoading, compact = false }) => {
     }, [compact]);
 
     const handleSubmit = async (text) => {
+        if (onClearError) onClearError();
         const projectDesc = text || prompt;
         if (!projectDesc.trim() || isLoading) return;
         onSuggest(projectDesc.trim());
@@ -61,7 +62,7 @@ const PromptBar = ({ onSuggest, onPreset, isLoading, compact = false }) => {
     if (compact) {
         return (
             <div className="prompt-compact">
-                <div className="prompt-compact-inner">
+                <div className={`prompt-compact-inner ${error ? 'has-error' : ''}`}>
                     <Sparkles size={16} className="prompt-sparkle" />
                     <input
                         ref={inputRef}
@@ -69,7 +70,10 @@ const PromptBar = ({ onSuggest, onPreset, isLoading, compact = false }) => {
                         className="prompt-input-compact"
                         placeholder="Describe a new project..."
                         value={prompt}
-                        onChange={(e) => setPrompt(e.target.value)}
+                        onChange={(e) => {
+                            setPrompt(e.target.value);
+                            if (error && onClearError) onClearError();
+                        }}
                         onKeyDown={handleKeyDown}
                         disabled={isLoading}
                     />
@@ -85,6 +89,13 @@ const PromptBar = ({ onSuggest, onPreset, isLoading, compact = false }) => {
                         )}
                     </button>
                 </div>
+                {error && (
+                    <div className="prompt-error-inline compact">
+                        <AlertCircle size={14} />
+                        <span>{error}</span>
+                        <button onClick={onClearError}><X size={12} /></button>
+                    </div>
+                )}
             </div>
         );
     }
@@ -106,14 +117,17 @@ const PromptBar = ({ onSuggest, onPreset, isLoading, compact = false }) => {
                     catalog. Describe your project, get a ready-to-use config in seconds.
                 </p>
 
-                <div className="prompt-hero-input-wrapper">
+                <div className={`prompt-hero-input-wrapper ${error ? 'has-error' : ''}`}>
                     <input
                         ref={inputRef}
                         type="text"
                         className="prompt-hero-input"
                         placeholder="e.g. Build a coloring game web app with AI-generated images..."
                         value={prompt}
-                        onChange={(e) => setPrompt(e.target.value)}
+                        onChange={(e) => {
+                            setPrompt(e.target.value);
+                            if (error && onClearError) onClearError();
+                        }}
                         onKeyDown={handleKeyDown}
                         disabled={isLoading}
                     />
@@ -133,7 +147,15 @@ const PromptBar = ({ onSuggest, onPreset, isLoading, compact = false }) => {
                     </button>
                 </div>
 
-                {!isLoading && (
+                {error && (
+                    <div className="prompt-error-inline hero">
+                        <AlertCircle size={16} />
+                        <span>{error}</span>
+                        <button onClick={onClearError}><X size={14} /></button>
+                    </div>
+                )}
+
+                {!isLoading && !error && (
                     <div className="prompt-examples">
                         <p className="examples-label">Try an example:</p>
                         <div className="examples-pills">
