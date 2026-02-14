@@ -126,7 +126,7 @@ const SettingsModal = () => {
                         <div className="settings-footer">
                             <div className={`settings-status ${isDemo ? 'warn' : 'ok'}`}>
                                 {apiMode === 'backend'
-                                    ? '⚠️ Using Free Demo (5/day)'
+                                    ? `⚠️ Using Free Demo (${import.meta.env.VITE_DEMO_LIMIT || 5}/day)`
                                     : (hasKey ? '✓ Key Configured' : '❌ Key Missing')}
                             </div>
                             <button className={`settings-save ${saved ? 'saved' : ''}`} onClick={handleSave}>
