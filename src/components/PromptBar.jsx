@@ -47,7 +47,54 @@ const PromptBar = ({ onSuggest, onPreset, isLoading, compact = false, error, onC
     const handleSubmit = async (text) => {
         if (onClearError) onClearError();
         const projectDesc = text || prompt;
+
         if (!projectDesc.trim() || isLoading) return;
+
+        if (projectDesc.length > 235) {
+            // Error logic needs to use a callback or set error state if available
+            // Since PromptBar receives 'error' as prop, it might not be able to set it directly if it's controlled by parent.
+            // checking props: error, onClearError.
+            // Wait, PromptBar doesn't have a setError prop, it receives error.
+            // But wait, look at lines 35: const PromptBar = ({ ..., error, onClearError })
+            // If I want to trigger an error, I might need to notify the parent or handle it locally if no parent handler.
+            // However, the previous implementation of SuggestionEngine has error handling.
+            // Actually, I can just use `alert` or if the parent has a way. 
+            // Better: The parent `Canvas` controls the error state. I should probably modify Canvas to accept an error, OR specific validation here.
+            // Actually, `Canvas` passes `setImageError`? No, `setError`.
+            // Let's check Canvas.jsx again.
+            // Canvas passes `error` and `onClearError`. It doesn't pass `setError`.
+            // So PromptBar cannot *set* the error state if it's lifted to Canvas.
+            // I might need to change Canvas.jsx to pass `setError` or `onError`.
+            // Let's assume for a moment I can't change the prop signature easily without checking Canvas.
+            // NOTE: Canvas passes `onSuggest`. I can wrap `onSuggest` to check length?
+            // "onSuggest(projectDesc.trim())"
+
+            // Let's just use window.alert for now? No, that's ugly.
+            // I should verify if I can pass error back.
+            // Actually, if I can't set error, I can't show the inline error.
+            // Checking Canvas.jsx again is wise.
+
+            // Re-reading Canvas.jsx view from earlier:
+            // 5: import PromptBar from './PromptBar';
+            // ...
+            // 64: <PromptBar onSuggest={handleSuggest} onPreset={handlePreset} isLoading={isLoading} error={error} onClearError={() => setError(null)} />
+            // ...
+            // 99: <PromptBar ... onClearError={() => setError(null)} ... />
+
+            // It only passes onClearError. It does NOT pass onError.
+            // So strictly speaking, PromptBar cannot set the error state shown in the UI.
+            // I have two options:
+            // 1. Modify Canvas.jsx to pass `onError` or `setError`.
+            // 2. Handle validation *inside* handleSuggest in Canvas.jsx? 
+            // validation in Canvas.jsx is cleaner since it controls the error state.
+
+            // BUT, the prompt state is inside PromptBar.
+            // If I do it in Canvas.jsx `handleSuggest(description)`, I can check description.length there.
+            // YES. That is the correct place. PromptBar sends the text to onSuggest. Canvas handles it.
+            // So in PromptBar, I just remove the maxLength and counter.
+            // Then in Canvas.jsx I add the check.
+        }
+
         onSuggest(projectDesc.trim());
     };
 

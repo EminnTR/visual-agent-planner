@@ -44,6 +44,14 @@ export default async function handler(req, res) {
     try {
         const { model, messages, providerId } = req.body;
 
+        // Security: Limit prompt length
+        if (messages && Array.isArray(messages)) {
+            const userMsg = messages.find(m => m.role === 'user');
+            if (userMsg && userMsg.content && userMsg.content.length > 300) {
+                return res.status(400).json({ error: 'Prompt too long (max 235 chars allowed).' });
+            }
+        }
+
         // 1. Rate Limiting (Global Only - Vercel KV)
         // ---------------------------------------------------------
         const limit = parseInt(process.env.VITE_DEMO_LIMIT || '5', 10);

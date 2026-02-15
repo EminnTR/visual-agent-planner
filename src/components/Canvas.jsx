@@ -18,6 +18,12 @@ const Canvas = () => {
     const { provider, getEffectiveKey, modelOverride, openSettings } = useSettingsStore();
 
     const handleSuggest = useCallback(async (description) => {
+        // Validation: Max 235 chars
+        if (description.length > 235) {
+            setError('Prompt is too long (max 235 chars). Please shorten it.');
+            return;
+        }
+
         setIsLoading(true);
         setError(null);
         try {

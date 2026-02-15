@@ -23,19 +23,30 @@ export function getCategoryItems(categoryKey) {
 }
 
 export function searchCatalog(query, categoryKey = null) {
-    const q = query.toLowerCase();
+    const q = query.toLowerCase().trim();
+    if (!q) return categoryKey ? { [categoryKey]: catalog[categoryKey] } : catalog;
+
+    const tokens = q.split(/\s+/).filter(t => t.length > 0);
+
     const searchIn = categoryKey
-        ? { [categoryKey]: catalog[categoryKey] }
-        : { agents: catalog.agents, commands: catalog.commands, hooks: catalog.hooks, mcps: catalog.mcps, settings: catalog.settings, skills: catalog.skills };
+        ? { [categoryKey]: catalog[categoryKey] || [] }
+        : {
+            agents: catalog.agents || [],
+            commands: catalog.commands || [],
+            hooks: catalog.hooks || [],
+            mcps: catalog.mcps || [],
+            settings: catalog.settings || [],
+            skills: catalog.skills || []
+        };
 
     const results = {};
     for (const [key, items] of Object.entries(searchIn)) {
-        results[key] = items.filter(item =>
-            item.name.toLowerCase().includes(q) ||
-            item.id.toLowerCase().includes(q) ||
-            (item.description && item.description.toLowerCase().includes(q)) ||
-            (item.category && item.category.toLowerCase().includes(q))
-        );
+        if (!items) continue;
+        results[key] = items.filter(item => {
+            const searchable = `${item.name} ${item.id} ${item.description || ''} ${item.category || ''}`.toLowerCase();
+            // All tokens must match (AND logic)
+            return tokens.every(token => searchable.includes(token));
+        });
     }
     return results;
 }
