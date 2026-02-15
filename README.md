@@ -9,12 +9,9 @@ VAP brings the powerful `aitmpl.com` template catalog (1477+ components) to a vi
 
 - 🎨 **Visual Interface**: Browse Agents, Skills, and more in a sleek dark UI.
 - 🤖 **AI Suggestions**: Get automatic recommendations based on your project description.
-- 🎨 **Visual Interface**: Browse Agents, Skills, and more in a sleek dark UI.
-- 🤖 **AI Suggestions**: Get automatic recommendations based on your project description.
-- ⚙️ **Settings Panel**: Configure API Connection (Demo Proxy or Personal Key) directly from the UI.
-- 🔒 **Secure Demo Mode**: Includes a Vercel-ready backend proxy with rate limiting (5 requests/day) for secure public demos.
 - 📦 **Huge Catalog**: 1477+ templates (Agents, Commands, Hooks, MCPs).
 - 🚀 **One-Click Install**: Copy a single `npx` command to set up everything.
+- ⚙️ **Settings Panel**: Configure API Connection (Demo Proxy or Personal Key) directly from the UI.
 
 ## Getting Started
 
