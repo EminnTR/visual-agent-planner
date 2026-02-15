@@ -14,22 +14,6 @@ const SettingsModal = () => {
 
     const [showKey, setShowKey] = useState(false);
     const [saved, setSaved] = useState(false);
-    const [usage, setUsage] = useState(null);
-    const [loadingUsage, setLoadingUsage] = useState(false);
-
-    // Fetch usage when modal opens and mode is backend
-    useEffect(() => {
-        if (isOpen && apiMode === 'backend') {
-            setLoadingUsage(true);
-            fetch('/api/suggest')
-                .then(res => res.json())
-                .then(data => {
-                    setUsage(data);
-                    setLoadingUsage(false);
-                })
-                .catch(() => setLoadingUsage(false));
-        }
-    }, [isOpen, apiMode]);
 
     const handleSave = () => {
         setSaved(true);
@@ -67,8 +51,6 @@ const SettingsModal = () => {
                                 <X size={18} />
                             </button>
                         </div>
-
-
 
                         {/* Connection Mode */}
                         <div className="settings-section">
@@ -140,17 +122,10 @@ const SettingsModal = () => {
                         {/* Status + Save */}
                         <div className="settings-footer">
                             <div className={`settings-status ${isDemo ? 'warn' : 'ok'}`}>
-                                {apiMode === 'backend' ? (
-                                    loadingUsage ? (
-                                        '⏳ Checking limit...'
-                                    ) : (
-                                        usage && usage.limit
-                                            ? `⚠️ Demo Limit: ${usage.used}/${usage.limit} used`
-                                            : '⚠️ Demo Mode (Unlimited)'
-                                    )
-                                ) : (
-                                    hasKey ? '✓ Key Configured' : '❌ Key Missing'
-                                )}
+                                {apiMode === 'backend'
+                                    ? '⚠️ Demo Mode'
+                                    : (hasKey ? '✓ Key Configured' : '❌ Key Missing')
+                                }
                             </div>
                             <button className={`settings-save ${saved ? 'saved' : ''}`} onClick={handleSave}>
                                 {saved ? <><Check size={16} /> Saved</> : 'Done'}

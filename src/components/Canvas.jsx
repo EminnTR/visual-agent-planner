@@ -11,6 +11,7 @@ const Canvas = () => {
     const [hasGenerated, setHasGenerated] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [browseCategory, setBrowseCategory] = useState(null);
+    const [browseSearch, setBrowseSearch] = useState('');
     const [error, setError] = useState(null);
 
     const { selected, setSelected, setSummary, summary, reset, addItem, removeItem } = useStore();
